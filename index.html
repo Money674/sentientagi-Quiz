@@ -8,20 +8,27 @@
 </head>
 <body>
   <div class="quiz-container">
-    <h1>🚀 Welcome to Sentient Quiz</h1>
-    <p class="subtitle">Test your knowledge about Sentient</p>
+    
+    <!-- Welcome Screen -->
+    <div id="welcome-screen">
+      <h1>🚀 Welcome to Sentient Quiz</h1>
+      <button id="start-btn" class="btn">Start Quiz</button>
+    </div>
 
-    <div id="quiz-box">
-      <div id="progress"></div>
+    <!-- Quiz Box -->
+    <div id="quiz-box" style="display:none;">
+      <div class="progress-container">
+        <div id="progress-fill" class="progress-fill"></div>
+      </div>
       <div id="question" class="question"></div>
       <div id="options" class="options"></div>
       <button id="next-btn" class="btn" style="display:none;">Next</button>
       <div id="result" class="result"></div>
       <a id="share-btn" href="#" target="_blank" class="btn share-btn">Share on X</a>
     </div>
+
   </div>
   <canvas id="confetti-canvas"></canvas>
-
   <script src="script.js"></script>
 </body>
 </html>
