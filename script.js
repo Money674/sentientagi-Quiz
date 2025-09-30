@@ -16,44 +16,65 @@ const quizData = [
   { question: "What makes Sentient the Linux of AGI?", options:["Open-source + community driven","Closed-source secret","Hardware only","VC funded only"], answer:"Open-source + community driven" }
 ];
 
-let current = 0;
-let score = 0;
+let current=0, score=0;
 
-const questionEl = document.getElementById("question");
-const optionsEl = document.getElementById("options");
-const nextBtn = document.getElementById("next-btn");
-const resultEl = document.getElementById("result");
-const shareBtn = document.getElementById("share-btn");
-const progressEl = document.getElementById("progress");
+const welcomeScreen=document.getElementById("welcome-screen");
+const startBtn=document.getElementById("start-btn");
+const quizBox=document.getElementById("quiz-box");
+const questionEl=document.getElementById("question");
+const optionsEl=document.getElementById("options");
+const nextBtn=document.getElementById("next-btn");
+const resultEl=document.getElementById("result");
+const shareBtn=document.getElementById("share-btn");
+const progressFill=document.getElementById("progress-fill");
 
-function loadQuestion() {
-  const data = quizData[current];
-  questionEl.textContent = data.question;
-  optionsEl.innerHTML = "";
-  resultEl.textContent = "";
-  nextBtn.style.display = "none";
-
-  data.options.forEach(opt => {
-    const div = document.createElement("div");
-    div.classList.add("option");
-    div.textContent = opt;
-    div.onclick = () => selectOption(div, data.answer);
-    optionsEl.appendChild(div);
-  });
-  progressEl.textContent = `Question ${current+1} of ${quizData.length}`;
+// Start Quiz
+startBtn.onclick = ()=>{
+  welcomeScreen.style.display="none";
+  quizBox.style.display="block";
+  loadQuestion();
 }
 
-function selectOption(el, answer) {
-  if (el.textContent === answer) {
-    score++;
-    el.classList.add("correct");
-  } else {
-    el.classList.add("wrong");
-    Array.from(optionsEl.children).forEach(opt=>{
-      if(opt.textContent === answer) opt.classList.add("correct");
-    });
+// Load Question
+function loadQuestion(){
+  const data=quizData[current];
+  questionEl.textContent=data.question;
+  questionEl.classList.remove("fade-in"); void questionEl.offsetWidth; questionEl.classList.add("fade-in");
+
+  optionsEl.innerHTML="";
+  resultEl.textContent="";
+  nextBtn.style.display="none";
+
+  data.options.forEach((opt,i)=>{
+    const div=document.createElement("div");
+    div.classList.add("option","fade-in");
+    div.style.animationDelay=`${i*0.1}s`;
+    div.textContent=opt;
+    div.onclick=()=>selectOption(div,data.answer);
+    optionsEl.appendChild(div);
+  });
+
+  // Update Progress Bar
+  const percent=(current/quizData.length)*100;
+  progressFill.style.width=`${percent}%`;
+
+  if(percent<=50){
+    const green=245, red=Math.floor(percent*2.55);
+    progressFill.style.backgroundColor=`rgb(${red},${green},160)`;
+  }else{
+    const green=Math.floor(245 - ((percent-50)*5.1)), red=255;
+    progressFill.style.backgroundColor=`rgb(${red},${green},160)`;
   }
-  Array.from(optionsEl.children).forEach(opt => (opt.onclick=null));
+}
+
+// Select Option
+function selectOption(el,answer){
+  if(el.textContent===answer){ score++; el.classList.add("correct"); }
+  else{
+    el.classList.add("wrong");
+    Array.from(optionsEl.children).forEach(opt=>{ if(opt.textContent===answer) opt.classList.add("correct"); });
+  }
+  Array.from(optionsEl.children).forEach(opt=>opt.onclick=null);
   nextBtn.style.display="inline-block";
 }
 
@@ -61,57 +82,29 @@ nextBtn.onclick = ()=>{
   current++;
   if(current<quizData.length) loadQuestion();
   else showResult();
-};
-
-// Confetti function
-function launchConfetti() {
-  const canvas = document.getElementById("confetti-canvas");
-  const ctx = canvas.getContext("2d");
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-  const pieces = [];
-  const colors = ["#00f5a0","#ffdd00","#ff4f81","#1DA1F2"];
-  for(let i=0;i<150;i++){
-    pieces.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:Math.random()*6+4,dx:(Math.random()*2-1),dy:Math.random()*3+2,color:colors[Math.floor(Math.random()*colors.length)]});
-  }
-  function draw(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    pieces.forEach(p=>{
-      ctx.beginPath();
-      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-      ctx.fillStyle=p.color;
-      ctx.fill();
-      p.x += p.dx;
-      p.y += p.dy;
-      if(p.y>canvas.height){p.y=0;p.x=Math.random()*canvas.width;}
-    });
-    requestAnimationFrame(draw);
-  }
-  draw();
-  setTimeout(()=>{ctx.clearRect(0,0,canvas.width,canvas.height)},4000);
 }
 
-function showResult() {
-  questionEl.textContent = "";
-  optionsEl.innerHTML = "";
-  nextBtn.style.display = "none";
-  resultEl.textContent = "🎉 You scored ";
-  shareBtn.style.display = "inline-block";
+// Show Result
+function showResult(){
+  questionEl.textContent=""; optionsEl.innerHTML=""; nextBtn.style.display="none"; resultEl.textContent=""; shareBtn.style.display="inline-block";
   launchConfetti();
-
-  // Animate score
-  let displayScore = 0;
-  const finalScore = score;
-  const total = quizData.length;
-  const interval = setInterval(()=>{
-    resultEl.textContent = `🎉 You scored ${displayScore}/${total}`;
-    if(displayScore>=finalScore) clearInterval(interval);
-    else displayScore++;
+  let display=0, finalScore=score, total=quizData.length;
+  const interval=setInterval(()=>{
+    resultEl.textContent=`🎉 You scored ${display}/${total}`;
+    if(display>=finalScore) clearInterval(interval);
+    else display++;
   },100);
-
-  const tweetText = encodeURIComponent(`I scored ${score}/${quizData.length} on the Sentient Quiz! 🚀`);
-  const url = encodeURIComponent("https://yourquizurl.com");
-  shareBtn.href = `https://twitter.com/intent/tweet?text=${tweetText}&url=${url}&hashtags=Sentient,Quiz`;
+  const tweetText=encodeURIComponent(`I scored ${score}/${quizData.length} on the Sentient Quiz! 🚀`);
+  const url=encodeURIComponent("https://yourquizurl.com");
+  shareBtn.href=`https://twitter.com/intent/tweet?text=${tweetText}&url=${url}&hashtags=Sentient,Quiz`;
 }
 
-loadQuestion();
+// Confetti
+function launchConfetti(){
+  const canvas=document.getElementById("confetti-canvas"), ctx=canvas.getContext("2d");
+  canvas.width=window.innerWidth; canvas.height=window.innerHeight;
+  const pieces=[], colors=["#00f5a0","#ffdd00","#ff4f81","#1DA1F2"];
+  for(let i=0;i<150;i++) pieces.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, r:Math.random()*6+4, dx:(Math.random()*2-1), dy:Math.random()*3+2, color:colors[Math.floor(Math.random()*colors.length)]});
+  function draw(){ ctx.clearRect(0,0,canvas.width,canvas.height); pieces.forEach(p=>{ ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fillStyle=p.color; ctx.fill(); p.x+=p.dx; p.y+=p.dy; if(p.y>canvas.height){p.y=0;p.x=Math.random()*canvas.width;} }); requestAnimationFrame(draw);}
+  draw(); setTimeout(()=>ctx.clearRect(0,0,canvas.width,canvas.height),4000);
+}
