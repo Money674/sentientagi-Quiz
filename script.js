@@ -95,7 +95,7 @@ function showResult(){
     else display++;
   },100);
   const tweetText=encodeURIComponent(`I scored ${score}/${quizData.length} on the Sentient Quiz! 🚀`);
-  const url=encodeURIComponent("https://yourquizurl.com");
+  const url=encodeURIComponent("https://sentientagi-quiz.vercel.app/");
   shareBtn.href=`https://twitter.com/intent/tweet?text=${tweetText}&url=${url}&hashtags=Sentient,Quiz`;
 }
 
